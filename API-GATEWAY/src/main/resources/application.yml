@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: API-GATEWAY
+
+  main:
+    web-application-type: reactive
+
+  config:
+    import: optional:configserver:http://localhost:7007
+
+  cloud:
+    gateway:
+      routes:
+        - id: ACCOUNT-MICROSERVICE
+          uri: lb://ACCOUNT-MICROSERVICE
+          predicates:
+            - Path=/api/accounts/**
+
+        - id: USER-CONTACT-SERVICES
+          uri: lb://USER-CONTACT-SERVICES
+          predicates:
+            - Path=/contact/**
+
+        - id: LEAD-MICROSERVICES
+          uri: lb://LEAD-MICROSERVICES
+          predicates:
+            - Path=/api/leads/**
+
+boot:
+  admin:
+    client:
+      url: http://localhost:5001/
+
+server:
+  port: 2002
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:5005/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      access: read-only
